@@ -42,8 +42,7 @@ class CoreVersionNumber
 
         $gitHeadLocation = '';
 
-        // NOTE: SB_PRIVATE_PATH is temporary.
-        $coreSubmodulePath = SB_PRIVATE_PATH . "/class/BluffingoCore";
+        $coreSubmodulePath = BLUFF_PRIVATE_PATH . "/class/BluffingoCore";
 
         $gitFile = $coreSubmodulePath . '/.git';
 
