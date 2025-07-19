@@ -49,6 +49,87 @@ class Database
         $this->sql = new PDO("mysql:host=$host;dbname=$db;charset=utf8mb4", $user, $pass, $options);
     }
 
+    public function result($query, $params = [])
+    {
+        $res = $this->query($query, $params);
+        return $res->fetchColumn();
+    }
+
+    public function query($query, $params = [])
+    {
+        $startTime = 0;
+        $executionTime = 0;
+
+        if ($this->profilingEnabled) {
+            $startTime = microtime(true);
+        }
+
+        $res = $this->sql->prepare($query);
+        $res->execute($params);
+
+        if ($this->profilingEnabled) {
+            $executionTime = microtime(true) - $startTime;
+
+            $this->logQueryForProfiler($query, $params, $startTime, $executionTime);
+        }
+
+        return $res;
+    }
+
+    public function fetchArray($query): array
+    {
+        $out = [];
+        while ($record = $query->fetch()) {
+            $out[] = $record;
+        }
+        return $out;
+    }
+
+    public function fetch($query, $params = [])
+    {
+        $res = $this->query($query, $params);
+        return $res->fetch();
+    }
+
+    public function insertId()
+    {
+        return $this->sql->lastInsertId();
+    }
+
+    public function getServerVersion()
+    {
+        return $this->sql->getAttribute(PDO::ATTR_SERVER_VERSION);
+    }
+
+    private function logQueryForProfiler($query, $params, $startTime, $executionTime)
+    {
+        $backtrace = debug_backtrace(DEBUG_BACKTRACE_IGNORE_ARGS, 2);
+        $immediateCaller = $backtrace[0] ?? [];
+        $actualCaller = $backtrace[1] ?? [];
+
+        // check if the caller isnt right here for queries done through fetch and fetchArray
+        $caller = (str_ends_with($immediateCaller['file'] ?? '', 'Database.php'))
+            ? $actualCaller
+            : $immediateCaller;
+
+        // remove root path so we have a shorter string
+        $file = str_replace(BLUFF_ROOT_PATH, '', $caller['file'] ?? '');
+
+        $callerInfo = [
+            'file' => $file ?? 'unknown',
+            'line' => $caller['line'] ?? 'unknown',
+            'function' => $caller['function'] ?? 'unknown',
+        ];
+
+        $this->queryLog[] = [
+            'query' => $query,
+            'params' => $params,
+            'execution_time' => $executionTime,
+            'timestamp' => microtime(true),
+            'caller_info' => $callerInfo,
+        ];
+    }
+
     public function setProfiling(bool $enabled): void
     {
         $this->profilingEnabled = $enabled;
@@ -114,76 +195,5 @@ class Database
         $report['average_time'] = $report['total_time'] / $report['total_queries'];
 
         return $report;
-    }
-
-    public function result($query, $params = [])
-    {
-        $res = $this->query($query, $params);
-        return $res->fetchColumn();
-    }
-
-    public function query($query, $params = [])
-    {
-        $startTime = microtime(true);
-
-        $res = $this->sql->prepare($query);
-        $res->execute($params);
-
-        $executionTime = microtime(true) - $startTime;
-
-        if ($this->profilingEnabled) {
-            $backtrace = debug_backtrace(DEBUG_BACKTRACE_IGNORE_ARGS, 2);
-            $immediateCaller = $backtrace[0] ?? [];
-            $actualCaller = $backtrace[1] ?? [];
-
-            // check if the caller isnt right here for queries done through fetch and fetchArray
-            $caller = (str_ends_with($immediateCaller['file'] ?? '', 'Database.php'))
-                ? $actualCaller
-                : $immediateCaller;
-
-            // remove root path so we have a shorter string
-            $file = str_replace(BLUFF_ROOT_PATH, '', $caller['file'] ?? '');
-
-            $callerInfo = [
-                'file' => $file ?? 'unknown',
-                'line' => $caller['line'] ?? 'unknown',
-                'function' => $caller['function'] ?? 'unknown',
-            ];
-
-            $this->queryLog[] = [
-                'query' => $query,
-                'params' => $params,
-                'execution_time' => $executionTime,
-                'timestamp' => microtime(true),
-                'caller_info' => $callerInfo,
-            ];
-        }
-
-        return $res;
-    }
-
-    public function fetchArray($query): array
-    {
-        $out = [];
-        while ($record = $query->fetch()) {
-            $out[] = $record;
-        }
-        return $out;
-    }
-
-    public function fetch($query, $params = [])
-    {
-        $res = $this->query($query, $params);
-        return $res->fetch();
-    }
-
-    public function insertId()
-    {
-        return $this->sql->lastInsertId();
-    }
-
-    public function getServerVersion()
-    {
-        return $this->sql->getAttribute(PDO::ATTR_SERVER_VERSION);
     }
 }

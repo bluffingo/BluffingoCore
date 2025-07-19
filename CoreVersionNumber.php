@@ -52,6 +52,8 @@ class CoreVersionNumber
 
         $content = file_get_contents($gitFile);
 
+        // TODO: figure out if $gitBranch is a detached head or the actual git branch
+
         if (preg_match('/^gitdir: (.*)$/m', $content, $matches)) {
             $gitDir = trim($matches[1]);
             // handle relative paths
