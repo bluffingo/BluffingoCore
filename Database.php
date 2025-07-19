@@ -4,7 +4,7 @@
   BluffingoCore
 
   Copyright (C) 2021-2025 Chaziz
-  Copyright (C) 2021 ROllerozxa
+  Copyright (C) 2021-2023 ROllerozxa
 
   BluffingoCore is free software: you can redistribute it and/or modify it 
   under the terms of the GNU Affero General Public License as published by 
@@ -94,6 +94,60 @@ class Database
     public function insertId()
     {
         return $this->sql->lastInsertId();
+    }
+
+    /**
+     * Helper function to insert a row into a table.
+     */
+    public function insertInto($table, $data, $dry = false) {
+        $fields = [];
+        $placeholders = [];
+        $values = [];
+
+        foreach ($data as $field => $value) {
+            $fields[] = $field;
+            $placeholders[] = '?';
+            $values[] = $value;
+        }
+
+        /*
+        $query = sprintf(
+            "INSERT INTO %s (%s) VALUES (%s)",
+        $table, commasep($fields), commasep($placeholders));
+        */
+
+        $query = sprintf(
+            "INSERT INTO %s (%s) VALUES (%s)",
+        $table, implode(',', $fields), implode(',', $placeholders));
+
+        if ($dry)
+            return $query;
+        else
+            return $this->query($query, $values);
+    }
+
+    /**
+     * Helper function to construct part of a query to set a lot of fields in one row
+     */
+    public function updateRowQuery($fields) {
+        // Temp variables for dynamic query construction.
+        $fieldquery = '';
+        $placeholders = [];
+
+        // Construct a query containing all fields.
+        foreach ($fields as $fieldk => $fieldv) {
+            if ($fieldquery) $fieldquery .= ',';
+            $fieldquery .= $fieldk.'=?';
+            $placeholders[] = $fieldv;
+        }
+
+        return ['fieldquery' => $fieldquery, 'placeholders' => $placeholders];
+    }
+
+    public function paginate($page, $pp) {
+        $page = (is_numeric($page) && $page > 0 ? $page : 1);
+
+        return sprintf(" LIMIT %s, %s", (($page - 1) * $pp), $pp);
     }
 
     public function getServerVersion()
