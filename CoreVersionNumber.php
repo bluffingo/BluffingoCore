@@ -37,13 +37,7 @@ class CoreVersionNumber
      */
     private function makeVersionString(): string
     {
-        // now i'm aware this could be unreliable. but i don't care.
-        // -chaziz 7/17/2025
-
-        $gitHeadLocation = '';
-
         $coreSubmodulePath = BLUFF_PRIVATE_PATH . "/class/BluffingoCore";
-
         $gitFile = $coreSubmodulePath . '/.git';
 
         if (!file_exists($gitFile)) {
@@ -52,26 +46,36 @@ class CoreVersionNumber
 
         $content = file_get_contents($gitFile);
 
-        // TODO: figure out if $gitBranch is a detached head or the actual git branch
-
         if (preg_match('/^gitdir: (.*)$/m', $content, $matches)) {
             $gitDir = trim($matches[1]);
             // handle relative paths
             if ($gitDir[0] !== '/') {
                 $gitDir = $coreSubmodulePath . '/' . $gitDir;
             }
+            
             $gitHeadLocation = $gitDir . '/HEAD';
-
             $gitHead = file_get_contents($gitHeadLocation);
-            $gitBranch = rtrim(preg_replace("/(.*?\/){2}/", '', $gitHead));
-            $commit = file_get_contents($gitDir . '/refs/heads/' . $gitBranch); // kind of bad but hey it works
-
-            $hash = substr($commit, 0, 7);
-
-            return sprintf('%s.%s-%s', $this->versionNumber, $gitBranch, $hash);
-        } else {
-            return $this->versionNumber;
+            
+            // if detached head
+            if (preg_match('/^[0-9a-f]{40}$/', trim($gitHead))) {
+                $hash = substr(trim($gitHead), 0, 7);
+                return sprintf('%s-%s', $this->versionNumber, $hash);
+            }
+            
+            // if on a branch
+            if (preg_match('/ref: refs\/heads\/(.*)$/', $gitHead, $matches)) {
+                $gitBranch = trim($matches[1]);
+                $commitFile = $gitDir . '/refs/heads/' . $gitBranch;
+                
+                if (file_exists($commitFile)) {
+                    $commit = file_get_contents($commitFile); // kind of bad but hey it works
+                    $hash = substr(trim($commit), 0, 7);
+                    return sprintf('%s.%s-%s', $this->versionNumber, $gitBranch, $hash);
+                }
+            }
         }
+        
+        return $this->versionNumber;
     }
 
     /**
