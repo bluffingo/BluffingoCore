@@ -1,17 +1,17 @@
 <?php
 
 /*
-  OpenSB: The Open SquareBracket Software
+  BluffingoCore
 
   Copyright (C) 2025 Chaziz
 
-  OpenSB is free software: you can redistribute it and/or modify it under the 
-  terms of the GNU Affero General Public License as published by the Free 
-  Software Foundation, either version 3 of the License, or (at your option) any
-  later version. 
+  BluffingoCore is free software: you can redistribute it and/or modify it 
+  under the terms of the GNU Affero General Public License as published by 
+  the Free Software Foundation, either version 3 of the License, or (at 
+  your option) any later version. 
 
-  OpenSB is distributed in the hope that it will be useful, but WITHOUT ANY 
-  WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS 
+  BluffingoCore is distributed in the hope that it will be useful, but WITHOUT
+  ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
   FOR A PARTICULAR PURPOSE. See the GNU Affero General Public License for more 
   details.
 
@@ -40,5 +40,11 @@ class CoreUtilities
         }
 
         return $protocol . '://' . $host;
+    }
+
+    public static function redirect(string $url, int $statusCode = 302): void
+    {
+        header("Location: $url", true, $statusCode);
+        exit;
     }
 }
