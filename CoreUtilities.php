@@ -42,7 +42,7 @@ class CoreUtilities
         return $protocol . '://' . $host;
     }
 
-    public static function redirect(string $url, int $statusCode = 302): void
+    public static function redirect(string $url, int $statusCode = 302): never
     {
         header("Location: $url", true, $statusCode);
         exit;
