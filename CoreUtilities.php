@@ -32,7 +32,7 @@ class CoreUtilities
             return null;
         }
 
-        $protocol = isset($_SERVER['HTTPS']) && $_SERVER['HTTPS'] === 'on' ? 'https' : 'http';
+        $protocol = self::isThisHttps() ? 'https' : 'http';
         $host = $_SERVER['HTTP_HOST'];
 
         if ($includeURI && isset($_SERVER['REQUEST_URI'])) {
@@ -46,5 +46,26 @@ class CoreUtilities
     {
         header("Location: $url", true, $statusCode);
         exit;
+    }
+
+    private static function isThisHttps()
+    {
+        if (isset($_SERVER['HTTPS']) && $_SERVER['HTTPS'] === 'on') {
+            return true;
+        }
+
+        // somewhat inefficient?
+        if (isset($_SERVER['HTTP_CF_VISITOR'])) {
+            $cf_visitor = json_decode($_SERVER['HTTP_CF_VISITOR']);
+            if (isset($cf_visitor->scheme) && $cf_visitor->scheme === 'https') {
+                return true;
+            }
+        }
+
+        if (isset($_SERVER['HTTP_X_FORWARDED_PROTO']) && $_SERVER['HTTP_X_FORWARDED_PROTO'] === 'https') {
+            return true;
+        }
+
+        return false;
     }
 }

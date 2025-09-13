@@ -28,7 +28,7 @@ class CoreVersionNumber
 
     public function __construct()
     {
-        $this->versionNumber = "1.0.0-beta.1";
+        $this->versionNumber = "1.0.0-beta.2";
         $this->versionString = $this->makeVersionString();
     }
 
@@ -52,21 +52,21 @@ class CoreVersionNumber
             if ($gitDir[0] !== '/') {
                 $gitDir = $coreSubmodulePath . '/' . $gitDir;
             }
-            
+
             $gitHeadLocation = $gitDir . '/HEAD';
             $gitHead = file_get_contents($gitHeadLocation);
-            
+
             // if detached head
             if (preg_match('/^[0-9a-f]{40}$/', trim($gitHead))) {
                 $hash = substr(trim($gitHead), 0, 7);
                 return sprintf('%s-%s', $this->versionNumber, $hash);
             }
-            
+
             // if on a branch
             if (preg_match('/ref: refs\/heads\/(.*)$/', $gitHead, $matches)) {
                 $gitBranch = trim($matches[1]);
                 $commitFile = $gitDir . '/refs/heads/' . $gitBranch;
-                
+
                 if (file_exists($commitFile)) {
                     $commit = file_get_contents($commitFile); // kind of bad but hey it works
                     $hash = substr(trim($commit), 0, 7);
@@ -74,7 +74,7 @@ class CoreVersionNumber
                 }
             }
         }
-        
+
         return $this->versionNumber;
     }
 
