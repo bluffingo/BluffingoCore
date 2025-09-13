@@ -99,7 +99,8 @@ class Database
     /**
      * Helper function to insert a row into a table.
      */
-    public function insertInto($table, $data, $dry = false) {
+    public function insertInto($table, $data, $dry = false)
+    {
         $fields = [];
         $placeholders = [];
         $values = [];
@@ -118,7 +119,10 @@ class Database
 
         $query = sprintf(
             "INSERT INTO %s (%s) VALUES (%s)",
-        $table, implode(',', $fields), implode(',', $placeholders));
+            $table,
+            implode(',', $fields),
+            implode(',', $placeholders)
+        );
 
         if ($dry)
             return $query;
@@ -129,7 +133,8 @@ class Database
     /**
      * Helper function to construct part of a query to set a lot of fields in one row
      */
-    public function updateRowQuery($fields) {
+    public function updateRowQuery($fields)
+    {
         // Temp variables for dynamic query construction.
         $fieldquery = '';
         $placeholders = [];
@@ -137,15 +142,22 @@ class Database
         // Construct a query containing all fields.
         foreach ($fields as $fieldk => $fieldv) {
             if ($fieldquery) $fieldquery .= ',';
-            $fieldquery .= $fieldk.'=?';
+            $fieldquery .= $fieldk . '=?';
             $placeholders[] = $fieldv;
         }
 
         return ['fieldquery' => $fieldquery, 'placeholders' => $placeholders];
     }
 
-    public function paginate($page, $pp) {
+    public function paginate($page, $pp)
+    {
         $page = (is_numeric($page) && $page > 0 ? $page : 1);
+
+        // if its too high just set it back to 1 to avoid a database error.
+        // THIS IS BY DESIGN. -chaziz 9/13/2025
+        if ($page > 2147483647) {
+            $page = 1;
+        }
 
         return sprintf(" LIMIT %s, %s", (($page - 1) * $pp), $pp);
     }
