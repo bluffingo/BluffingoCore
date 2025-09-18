@@ -21,6 +21,8 @@
 
 namespace BluffingoCore;
 
+use Exception;
+
 class CoreVersionNumber
 {
     private string $versionNumber;
@@ -28,7 +30,7 @@ class CoreVersionNumber
 
     public function __construct()
     {
-        $this->versionNumber = "1.0.0-beta.2";
+        $this->versionNumber = "1.0.0-rc.1";
         $this->versionString = $this->makeVersionString();
     }
 
@@ -37,42 +39,26 @@ class CoreVersionNumber
      */
     private function makeVersionString(): string
     {
-        $coreSubmodulePath = BLUFF_PRIVATE_PATH . "/class/BluffingoCore";
-        $gitFile = $coreSubmodulePath . '/.git';
+        try {
+            $gitInfo = new GitInfo(BLUFF_PRIVATE_PATH . "/class/BluffingoCore");
 
-        if (!file_exists($gitFile)) {
-            return $this->versionNumber;
-        }
+            $branch = $gitInfo->getGitBranch();
+            $hash = $gitInfo->getGitCommitHash();
 
-        $content = file_get_contents($gitFile);
+            // if for example, the version number is bluffingocore 1.0 and
+            // we're on the core-1.0 branch, we don't need to show the git 
+            // branch as it would just repeat itself.
+            if (preg_match('/^(\d+\.\d+)/', $this->versionNumber, $matches)) {
+                $majorMinor = $matches[1];
 
-        if (preg_match('/^gitdir: (.*)$/m', $content, $matches)) {
-            $gitDir = trim($matches[1]);
-            // handle relative paths
-            if ($gitDir[0] !== '/') {
-                $gitDir = $coreSubmodulePath . '/' . $gitDir;
-            }
-
-            $gitHeadLocation = $gitDir . '/HEAD';
-            $gitHead = file_get_contents($gitHeadLocation);
-
-            // if detached head
-            if (preg_match('/^[0-9a-f]{40}$/', trim($gitHead))) {
-                $hash = substr(trim($gitHead), 0, 7);
-                return sprintf('%s-%s', $this->versionNumber, $hash);
-            }
-
-            // if on a branch
-            if (preg_match('/ref: refs\/heads\/(.*)$/', $gitHead, $matches)) {
-                $gitBranch = trim($matches[1]);
-                $commitFile = $gitDir . '/refs/heads/' . $gitBranch;
-
-                if (file_exists($commitFile)) {
-                    $commit = file_get_contents($commitFile); // kind of bad but hey it works
-                    $hash = substr(trim($commit), 0, 7);
-                    return sprintf('%s.%s-%s', $this->versionNumber, $gitBranch, $hash);
+                if (str_starts_with($branch, 'core-' . $majorMinor)) {
+                    return sprintf('%s-%s', $this->versionNumber, $hash);
                 }
             }
+
+            return sprintf('%s.%s-%s', $this->versionNumber, $branch, $hash);
+        } catch (Exception) {
+            return $this->versionNumber;
         }
 
         return $this->versionNumber;
