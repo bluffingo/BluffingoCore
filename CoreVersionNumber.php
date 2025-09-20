@@ -30,7 +30,7 @@ class CoreVersionNumber
 
     public function __construct()
     {
-        $this->versionNumber = "1.0.0-rc.1";
+        $this->versionNumber = "1.0.0";
         $this->versionString = $this->makeVersionString();
     }
 
@@ -56,7 +56,11 @@ class CoreVersionNumber
                 }
             }
 
-            return sprintf('%s.%s-%s', $this->versionNumber, $branch, $hash);
+            if ($branch) {
+                return sprintf('%s.%s-%s', $this->versionNumber, $branch, $hash);
+            } else {
+                return sprintf('%s-%s', $this->versionNumber, $hash);
+            }
         } catch (Exception) {
             return $this->versionNumber;
         }
