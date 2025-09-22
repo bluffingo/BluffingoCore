@@ -23,13 +23,38 @@ namespace BluffingoCore;
 
 use Exception;
 
+/**
+ * class GitInfo
+ */
 class GitInfo
 {
+    /**
+     * @var bool
+     */
     private bool $isSubmodule;
+
+    /**
+     * @var string
+     */
     private string $gitCommitHash;
+
+    /**
+     * @var string
+     */
     private string $gitBranch;
+
+    /**
+     * @var string
+     */
     private string $gitPath;
 
+    /**
+     * function __construct
+     *
+     * @param mixed $path
+     *
+     * @return void
+     */
     public function __construct($path = null)
     {
         $this->gitBranch = "";
@@ -85,11 +110,21 @@ class GitInfo
         }
     }
 
+    /**
+     * function getGitBranch
+     *
+     * @return mixed
+     */
     public function getGitBranch()
     {
         return $this->gitBranch;
     }
 
+    /**
+     * function getGitCommitHash
+     *
+     * @return mixed
+     */
     public function getGitCommitHash()
     {
         return $this->gitCommitHash;

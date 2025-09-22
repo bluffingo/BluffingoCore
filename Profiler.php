@@ -24,18 +24,45 @@
 namespace BluffingoCore;
 
 /**
- * Revamped profiler.
+ * class Profiler
  *
+ * Revamped profiler.
  * NOTE: The database query profiler is in the Database class.
  */
 class Profiler
 {
+    /**
+     * @var Database
+     */
     private Database $database;
+
+    /**
+     * @var mixed
+     */
     private $starttime;
+
+    /**
+     * @var mixed
+     */
     private $database_query_log;
+
+    /**
+     * @var array
+     */
     private ?array $database_profiling_report;
+
+    /**
+     * @var bool
+     */
     private bool $database_profiler_function_called = false;
 
+    /**
+     * function __construct
+     *
+     * @param mixed $database
+     *
+     * @return void
+     */
     public function __construct($database)
     {
         $this->database = $database;
@@ -43,6 +70,12 @@ class Profiler
     }
 
     // this should be called AFTER the database is done with everything
+
+    /**
+     * function getDatabaseProfilerInfo
+     *
+     * @return void
+     */
     private function getDatabaseProfilerInfo(): void
     {
         // slightly ugly hack so we dont repeat this shit (because of squarebrackettwigextension)
@@ -53,6 +86,11 @@ class Profiler
         }
     }
 
+    /**
+     * function whoAmI
+     *
+     * @return string
+     */
     private function whoAmI(): string
     {
         $whoami = exec('whoami');
@@ -62,6 +100,11 @@ class Profiler
         return "Running under unknown system user";
     }
 
+    /**
+     * function getStats
+     *
+     * @return void
+     */
     public function getStats(): void
     {
         $this->getDatabaseProfilerInfo();
@@ -74,6 +117,11 @@ class Profiler
         );
     }
 
+    /**
+     * function getDatabaseProfilingReport
+     *
+     * @return array
+     */
     public function getDatabaseProfilingReport(): ?array
     {
         $this->getDatabaseProfilerInfo();

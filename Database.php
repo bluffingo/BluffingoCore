@@ -26,16 +26,36 @@ use Exception;
 use PDO;
 
 /**
+ * class Database
+ *
  * PDO interface(?).
  */
 class Database
 {
-    private $sql;
-    private $queryLog = [];
-    private $profilingEnabled = false;
+    /**
+     * @var PDO
+     */
+    private PDO $sql;
 
     /**
-     * @throws Exception
+     * @var array
+     */
+    private array $queryLog = [];
+
+    /**
+     * @var bool
+     */
+    private bool $profilingEnabled = false;
+
+    /**
+     * function __construct
+     *
+     * @param mixed $host
+     * @param mixed $user
+     * @param mixed $pass
+     * @param mixed $db
+     *
+     * @return void
      */
     public function __construct($host, $user, $pass, $db)
     {
@@ -49,12 +69,28 @@ class Database
         $this->sql = new PDO("mysql:host=$host;dbname=$db;charset=utf8mb4", $user, $pass, $options);
     }
 
+    /**
+     * function result
+     *
+     * @param mixed $query
+     * @param mixed $params
+     *
+     * @return mixed
+     */
     public function result($query, $params = [])
     {
         $res = $this->query($query, $params);
         return $res->fetchColumn();
     }
 
+    /**
+     * function query
+     *
+     * @param mixed $query
+     * @param mixed $params
+     *
+     * @return mixed
+     */
     public function query($query, $params = [])
     {
         $startTime = 0;
@@ -76,6 +112,13 @@ class Database
         return $res;
     }
 
+    /**
+     * function fetchArray
+     *
+     * @param mixed $query
+     *
+     * @return array
+     */
     public function fetchArray($query): array
     {
         $out = [];
@@ -85,19 +128,40 @@ class Database
         return $out;
     }
 
+    /**
+     * function fetch
+     *
+     * @param mixed $query
+     * @param mixed $params
+     *
+     * @return mixed
+     */
     public function fetch($query, $params = [])
     {
         $res = $this->query($query, $params);
         return $res->fetch();
     }
 
+    /**
+     * function insertId
+     *
+     * @return mixed
+     */
     public function insertId()
     {
         return $this->sql->lastInsertId();
     }
 
     /**
+     * function insertInto
+     *
      * Helper function to insert a row into a table.
+     *
+     * @param mixed $table
+     * @param mixed $data
+     * @param mixed $dry
+     *
+     * @return mixed
      */
     public function insertInto($table, $data, $dry = false)
     {
@@ -131,7 +195,13 @@ class Database
     }
 
     /**
+     * function updateRowQuery
+     *
      * Helper function to construct part of a query to set a lot of fields in one row
+     *
+     * @param mixed $fields
+     *
+     * @return array
      */
     public function updateRowQuery($fields)
     {
@@ -149,6 +219,14 @@ class Database
         return ['fieldquery' => $fieldquery, 'placeholders' => $placeholders];
     }
 
+    /**
+     * function paginate
+     *
+     * @param mixed $page
+     * @param mixed $pp
+     *
+     * @return mixed
+     */
     public function paginate($page, $pp)
     {
         $page = (is_numeric($page) && $page > 0 ? $page : 1);
@@ -162,11 +240,26 @@ class Database
         return sprintf(" LIMIT %s, %s", (($page - 1) * $pp), $pp);
     }
 
+    /**
+     * function getServerVersion
+     *
+     * @return mixed
+     */
     public function getServerVersion()
     {
         return $this->sql->getAttribute(PDO::ATTR_SERVER_VERSION);
     }
 
+    /**
+     * function logQueryForProfiler
+     *
+     * @param mixed $query
+     * @param mixed $params
+     * @param mixed $startTime
+     * @param mixed $executionTime
+     *
+     * @return void
+     */
     private function logQueryForProfiler($query, $params, $startTime, $executionTime)
     {
         $backtrace = debug_backtrace(DEBUG_BACKTRACE_IGNORE_ARGS, 2);
@@ -196,11 +289,23 @@ class Database
         ];
     }
 
+    /**
+     * function setProfiling
+     *
+     * @param bool $enabled
+     *
+     * @return void
+     */
     public function setProfiling(bool $enabled): void
     {
         $this->profilingEnabled = $enabled;
     }
 
+    /**
+     * function getQueryLog
+     *
+     * @return array
+     */
     public function getQueryLog(): array
     {
         if (!$this->profilingEnabled) {
@@ -211,9 +316,13 @@ class Database
     }
 
     /**
+     * function getProfilingReport
+     *
      * IMPORTANT: DO NOT CALL THIS FUNCTION OUTSIDE OF PROFILER. IF YOU NEED THE DATABASE PROFILING REPORT.
      * GET THAT SHIT THROUGH THE PROFILER CLASS' getDatabaseProfilerInfo FUNCTION (because then youll get
      * the full data). -chaziz -4/12/2025
+     *
+     * @return array
      */
     public function getProfilingReport(): array
     {

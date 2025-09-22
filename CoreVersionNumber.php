@@ -30,7 +30,7 @@ class CoreVersionNumber
 
     public function __construct()
     {
-        $this->versionNumber = "1.0.0";
+        $this->versionNumber = "2.0.0-dev";
         $this->versionString = $this->makeVersionString();
     }
 

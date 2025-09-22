@@ -22,10 +22,21 @@
 namespace BluffingoCore;
 
 /**
+ * class CoreUtilities
+ *
  * Static core utilities.
  */
 class CoreUtilities
 {
+    /**
+     * function getURL
+     * 
+     * Gets the URL string.
+     *
+     * @param bool $includeURI
+     *
+     * @return string
+     */
     public static function getURL(bool $includeURI = false): ?string
     {
         if (!isset($_SERVER['HTTP_HOST'])) {
@@ -42,12 +53,29 @@ class CoreUtilities
         return $protocol . '://' . $host;
     }
 
+    /**
+     * function redirect
+     * 
+     * Redirect to a new location.
+     *
+     * @param string $url
+     * @param int $statusCode
+     *
+     * @return never
+     */
     public static function redirect(string $url, int $statusCode = 302): never
     {
         header("Location: $url", true, $statusCode);
         exit;
     }
 
+    /**
+     * function isThisHttps
+     * 
+     * Figure out if we're on HTTPS or not.
+     *
+     * @return bool
+     */
     private static function isThisHttps()
     {
         if (isset($_SERVER['HTTPS']) && $_SERVER['HTTPS'] === 'on') {

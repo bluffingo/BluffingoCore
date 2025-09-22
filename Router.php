@@ -21,11 +21,30 @@
 
 namespace BluffingoCore;
 
+/**
+ * class Router
+ */
 class Router
 {
+    /**
+     * @var array
+     */
     private array $routes = [];
+
+    /**
+     * @var mixed
+     */
     private mixed $fallbackHandler = null;
 
+    /**
+     * function add
+     *
+     * @param string $path
+     * @param mixed $handler
+     * @param string $method
+     *
+     * @return void
+     */
     public function add(string $path, mixed $handler, ?string $method = null): void
     {
         // automatically add BLUFF_PRIVATE_PATH for file paths
@@ -49,16 +68,40 @@ class Router
         }
     }
 
+    /**
+     * function redirect
+     *
+     * @param string $from
+     * @param string $to
+     * @param int $statusCode
+     *
+     * @return void
+     */
     public function redirect(string $from, string $to, int $statusCode = 302): void
     {
         $this->add($from, fn() => CoreUtilities::redirect($to, $statusCode));
     }
 
+    /**
+     * function setFallback
+     *
+     * @param mixed $handler
+     *
+     * @return void
+     */
     public function setFallback(mixed $handler): void
     {
         $this->fallbackHandler = $handler;
     }
 
+    /**
+     * function dispatch
+     *
+     * @param string $requestUri
+     * @param string $requestMethod
+     *
+     * @return void
+     */
     public function dispatch(?string $requestUri = null, ?string $requestMethod = null): void
     {
         $requestUri ??= $_SERVER['REQUEST_URI'] ?? '/';
@@ -77,6 +120,13 @@ class Router
         $this->executeFallback();
     }
 
+    /**
+     * function compilePattern
+     *
+     * @param string $path
+     *
+     * @return string
+     */
     private function compilePattern(string $path): string
     {
         $pattern = preg_quote($path, '#');
@@ -85,12 +135,27 @@ class Router
         return '#^' . $pattern . '$#';
     }
 
+    /**
+     * function normalizeUri
+     *
+     * @param string $uri
+     *
+     * @return string
+     */
     private function normalizeUri(string $uri): string
     {
         $uri = parse_url($uri, PHP_URL_PATH) ?? '/';
         return rtrim($uri, '/') ?: '/';
     }
 
+    /**
+     * function executeHandler
+     *
+     * @param mixed $handler
+     * @param array $params
+     *
+     * @return void
+     */
     private function executeHandler(mixed $handler, array $params = []): void
     {
         match (true) {
@@ -100,12 +165,25 @@ class Router
         };
     }
 
+    /**
+     * function includeFile
+     *
+     * @param string $file
+     * @param array $params
+     *
+     * @return void
+     */
     private function includeFile(string $file, array $params): void
     {
         extract($params, EXTR_SKIP);
         require $file;
     }
 
+    /**
+     * function executeFallback
+     *
+     * @return void
+     */
     private function executeFallback(): void
     {
         match (true) {
@@ -115,6 +193,11 @@ class Router
         };
     }
 
+    /**
+     * function default404
+     *
+     * @return void
+     */
     private function default404(): void
     {
         http_response_code(404);
