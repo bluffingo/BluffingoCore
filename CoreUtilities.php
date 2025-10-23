@@ -76,7 +76,7 @@ class CoreUtilities
      *
      * @return bool
      */
-    private static function isThisHttps()
+    public static function isThisHttps()
     {
         if (isset($_SERVER['HTTPS']) && $_SERVER['HTTPS'] === 'on') {
             return true;
