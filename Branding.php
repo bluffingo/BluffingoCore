@@ -28,15 +28,42 @@ class Branding
 {
     private $brand_settings = [
         "name" => "BrandName",
-        "assets" => "/assets/qb_branding",
-        "is_vector" => true,
+        "assets" => "/assets/placeholder",
+        "is_vector" => false,
         "use_wordmark" => false,
     ];
 
-    public function __construct() {}
+    /**
+     * function __construct
+     * 
+     * Initialize Branding class.
+     */
+    public function __construct(array $settings)
+    {
+        $this->brand_settings = $settings;
+    }
 
+    /**
+     * function setBrandingSettings
+     * 
+     * Set branding settings. This is used on SquareBracket to switch 
+     * from SquareBracket branding to FulpTube branding whenever the user is
+     * either on the Finalium Hitchhiker theme or on the FulpTube.rocks domain.
+     */
+    public function setBrandingSettings(array $settings)
+    {
+        $this->brand_settings = array_merge($this->brand_settings, $settings);
+    }
+
+    /**
+     * function getBrandSettings
+     * 
+     * Get branding settings.
+     */
     public function getBrandSettings()
     {
         return $this->brand_settings;
     }
+
+    // todo: add functions to get specific branding settings
 }
