@@ -28,7 +28,7 @@ use PDO;
 /**
  * class Database
  *
- * PDO interface(?).
+ * Simplified PDO interface.
  */
 class Database
 {
@@ -50,15 +50,17 @@ class Database
     /**
      * function __construct
      *
-     * @param mixed $host
-     * @param mixed $user
-     * @param mixed $pass
-     * @param mixed $db
+     * @param array $config
      *
      * @return void
      */
-    public function __construct($host, $user, $pass, $db)
+    public function __construct(array $config)
     {
+        $host = $config["host"] ?? "";
+        $db = $config["database"] ?? "";
+        $user = $config["username"] ?? "";
+        $pass = $config["password"] ?? "";
+
         $options = [
             PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION,
             PDO::ATTR_DEFAULT_FETCH_MODE => PDO::FETCH_ASSOC,
