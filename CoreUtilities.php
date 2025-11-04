@@ -96,4 +96,22 @@ class CoreUtilities
 
         return false;
     }
+
+    /**
+     * function getIpAddress
+     * 
+     * if you're using CloudFlare, make sure you've properly configured your server so that IPs arent CloudFlare IPs.
+     *
+     * @return mixed|string
+     */
+    public static function getIpAddress()
+    {
+        if (BLUFF_CLI) return null;
+
+        $ip = $_SERVER['REMOTE_ADDR'];
+
+        if ($ip == "127.0.0.1" | $ip == "::1" | $ip == "localhost") return "localhost";
+
+        return $ip;
+    }
 }
