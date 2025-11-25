@@ -30,7 +30,7 @@ class CoreVersionNumber
 
     public function __construct()
     {
-        $this->versionNumber = "1.0.1";
+        $this->versionNumber = "1.0.2";
         $this->versionString = $this->makeVersionString();
     }
 
@@ -64,8 +64,6 @@ class CoreVersionNumber
         } catch (Exception) {
             return $this->versionNumber;
         }
-
-        return $this->versionNumber;
     }
 
     /**

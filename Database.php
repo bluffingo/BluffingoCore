@@ -39,14 +39,26 @@ class Database
      */
     public function __construct($host, $user, $pass, $db)
     {
-        $options = [
-            PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION,
-            PDO::ATTR_DEFAULT_FETCH_MODE => PDO::FETCH_ASSOC,
-            PDO::ATTR_EMULATE_PREPARES => false,
-            PDO::MYSQL_ATTR_INIT_COMMAND => 'SET sql_mode="TRADITIONAL"'
-        ];
+        // ok this is fucking dumb and i don't know if this is going to fuck out on 8.3 and older.
+        if (version_compare(PHP_VERSION, '8.4.0') >= 0) {
+            $options = [
+                PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION,
+                PDO::ATTR_DEFAULT_FETCH_MODE => PDO::FETCH_ASSOC,
+                PDO::ATTR_EMULATE_PREPARES => false,
+                PDO\Mysql::ATTR_INIT_COMMAND => 'SET sql_mode="TRADITIONAL"'
+            ];
 
-        $this->sql = new PDO("mysql:host=$host;dbname=$db;charset=utf8mb4", $user, $pass, $options);
+            $this->sql = new PDO\Mysql("mysql:host=$host;dbname=$db;charset=utf8mb4", $user, $pass, $options);
+        } else {
+            $options = [
+                PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION,
+                PDO::ATTR_DEFAULT_FETCH_MODE => PDO::FETCH_ASSOC,
+                PDO::ATTR_EMULATE_PREPARES => false,
+                PDO::MYSQL_ATTR_INIT_COMMAND => 'SET sql_mode="TRADITIONAL"'
+            ];
+
+            $this->sql = new PDO("mysql:host=$host;dbname=$db;charset=utf8mb4", $user, $pass, $options);    
+        }
     }
 
     public function result($query, $params = [])
